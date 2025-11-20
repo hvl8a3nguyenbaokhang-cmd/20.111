@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NIÊN KHÓA 23-26, 47 thành viên</title>
+
+  <style>
+    :root{
+      --bg:#fff8fb;
+      --card:#fff;
+      --accent:#ff7a9a;
+      --muted:#6b6b6b;
+      --glass: rgba(255,255,255,0.6);
+    }
+    html,body{height:100%;margin:0;font-family:Inter, "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;background:linear-gradient(180deg,#fff8fb,#fff);color:#222}
+    .wrap{max-width:1100px;margin:28px auto;padding:18px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    header h1{font-size:20px;margin:0;color:var(--accent)}
+    header p{margin:0;color:var(--muted);font-size:13px}
+
+    /* grid */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:14px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:10px;
+      box-shadow:0 8px 22px rgba(14,14,14,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+      text-align:center;
+      transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s;
+      position:relative;
+      overflow:hidden;
+    }
+    .card:hover{ transform: translateY(-8px) scale(1.02); box-shadow:0 18px 36px rgba(14,14,14,0.12) }
+
+    .avatar{
+      width:96px;height:96px;border-radius:14px;overflow:hidden;
+      display:block;background:linear-gradient(180deg,#ffeef4,#fff);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .num-badge{
+      position:absolute;left:8px;top:8px;background:linear-gradient(180deg,#ff9ab3,#ff6b8a);
+      color:#fff;padding:6px 8px;border-radius:10px;font-weight:700;font-size:13px;box-shadow:0 6px 16px rgba(255,122,154,0.18)
+    }
+
+    .name{font-weight:700;font-size:14px;color:#222;margin:0}
+    .role{font-size:12px;color:var(--muted);margin:0}
+
+    /* tiny video icon */
+    #video-trigger{
+      position:fixed;left:18px;bottom:18px;background:linear-gradient(135deg,#7ad0ff,#7af1c4);
+      color:#063241;padding:10px 12px;border-radius:999px;box-shadow:0 12px 30px rgba(8,30,42,0.12);
+      display:inline-flex;gap:8px;align-items:center;cursor:pointer;z-index:9999;font-weight:700;
+      transition:transform .14s ease;user-select:none;
+    }
+    #video-trigger:active{ transform:scale(.96) }
+    #video-trigger .icon{font-size:16px}
+
+    /* entry animation (stagger) */
+    .card{opacity:0;transform:translateY(16px) scale(.99)}
+    .card.show{opacity:1;transform:none;transition:all .45s cubic-bezier(.2,.9,.3,1)}
+
+    /* modal-style fullscreen video */
+    .video-full{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:10000;
+    }
+    .video-full video{max-width:100%;max-height:100%;border-radius:6px;box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+    .video-full .close{
+      position:absolute;right:18px;top:18px;color:#fff;font-size:18px;background:rgba(255,255,255,0.06);padding:8px;border-radius:8px;cursor:pointer
+    }
+
+    /* responsive tweaks */
+    @media (max-width:520px){
+      .avatar{width:84px;height:84px}
+      .grid{gap:10px}
+    }
+
+    /* cute hover sparkle */
+    .card:after{
+      content:"";position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), transparent 40%);transform:rotate(15deg);opacity:0;transition:opacity .25s
+    }
+    .card:hover:after{ opacity:1 }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Lớp 12C1 — 47 thành viên (Niên khóa 23-26)</h1>
+      
+    </header>
+
+    <section class="grid" id="membersGrid" aria-label="Danh sách thành viên">
+      <!-- JS will populate 47 cards here -->
+    </section>
+  </div>
+
+  <!-- video trigger (small icon) -->
+  <div id="video-trigger" role="button" aria-label="Xem video kỷ niệm">
+    <span class="icon">🎬</span>
+    <span>Video </span>
+  </div>
+
+  <!-- fullscreen video overlay -->
+  <div class="video-full" id="videoFull" aria-hidden="true">
+    <button class="close" id="videoClose" aria-label="Đóng video">✕</button>
+    <video id="memoryVideo" controls playsinline webkit-playsinline preload="metadata">
+      <!-- source will be set in JS; place your video at ./video/memory.mp4 -->
+    </video>
+  </div>
+
+    
+<script>
+  // --- CONFIG: update names[] and file paths as needed ---
+  // Place 47 images at: ./images/1.jpg, ./images/2.jpg, ..., ./images/47.jpg
+  // Place video at: ./video/memory.mp4
+  const imgBase = './images/';   // <-- đúng: thư mục chứa 1.jpg..47.jpg (relative với index3.html)
+  const videoFile = './video/1.mp4'; // <-- sửa theo file video của bạn
+
+  // Replace names below with actual class member names (47 entries)
+  const names = [
+    "Nguyễn Thái Hà An",
+    "Hà Nguyễn Thiên Ân",
+    "Dương Ngọc Minh Anh",
+    "Lê Vân Anh",
+    "Đặng Kim Nguyễn Duy",
+    "Nguyễn Quốc Duy",
+    "Trần Vũ Thái Duy",
+    "Mạc Hồ Hương Giang",
+    "Nguyễn Thị Ngọc Hân",
+    "Nguyễn Minh Hằng",
+    "Dan Chí Hào",
+    "Nguyễn Nhật Hào",
+    "Nguyễn Sỹ Trung Hiếu",
+    "Trần Ngọc Phương Hoàng",
+    "Trần Ngọc Gia Huy",
+    "Phạm Quang Huy",
+    "Huỳnh Hải Huyền",
+    "Trần Thị Ngọc Huyền",
+    "Đồng Phước Khang",
+    "Nguyễn Bảo Khang",
+    "Đặng Hoàng Bảo Khanh",
+    "Tô Hoàng Anh Khoa",
+    "Nguyễn Tuấn Kiệt",
+    "Võ Tuấn Kiệt",
+    "Tô Cẩm Lâm",
+    "Lư Ngọc Linh",
+    "Trần Phương Linh",
+    "Đặng Huỳnh Thanh Long",
+    "Nguyễn Duy Mạnh",
+    "Trịnh Tiến Minh",
+    "Nguyễn Duy Nam",
+    "Trương Trọng Nam",
+    "Nguyễn Thị Thanh Ngân",
+    "Trần Ngọc Thảo Nguyên",
+    "Nguyễn Thị Thanh Nhàn",
+    "Nguyễn Lê Trường Nhật",
+    "Bùi Ngọc Phát",
+    "Nguyễn Minh Phát",
+    "Trần Văn Phong",
+    "Trần Thanh Phúc",
+    "Phạm Phú Quý",
+    "Ngô Tâm Tâm",
+    "Phạm Ngọc Thanh Thảo",
+    "Trương Lập Triển",
+    "Nguyễn Thanh Trúc",
+    "Trịnh Quang Tuấn",
+    "Nguyễn Quốc Vinh"
+  ];
+
+  // create grid cards
+  const grid = document.getElementById('membersGrid');
+  for (let i = 0; i < 47; i++){
+    const idx = i + 1;
+    const imgPath = `${imgBase}${idx}.jpg`;
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    // Use onerror fallback to placeholder and log missing images
+    card.innerHTML = `
+      <div class="num-badge">${idx}</div>
+      <a href="${imgPath}" target="_blank" rel="noopener noreferrer" aria-label="Mở ảnh ${idx}">
+        <span class="avatar">
+          <img loading="lazy"
+               src="${imgPath}"
+               alt="Ảnh thành viên ${idx}"
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/400x400?text=No+Image'; console.warn('Image missing:', '${imgPath}');" />
+        </span>
+      </a>
+      <p class="name">${names[i] || "Thành viên " + idx}</p>
+      <p class="role"></p>
+    `;
+    grid.appendChild(card);
+    // stagger reveal
+    setTimeout(()=> card.classList.add('show'), i * 30);
+  }
+
+  // --- video fullscreen logic ---
+  const trigger = document.getElementById('video-trigger');
+  const overlay = document.getElementById('videoFull');
+  const video = document.getElementById('memoryVideo');
+  const closeBtn = document.getElementById('videoClose');
+
+  // set video source (replace existing sources)
+  video.innerHTML = '';
+  const source = document.createElement('source');
+  source.src = videoFile;
+  source.type = 'video/mp4';
+  video.appendChild(source);
+
+  function requestFS(el) {
+    if (!el) return Promise.reject();
+    if (el.requestFullscreen) return el.requestFullscreen();
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    if (el.msRequestFullscreen) return el.msRequestFullscreen();
+    return Promise.reject();
+  }
+
+  function openVideo(){
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden','false');
+    video.currentTime = 0;
+    video.muted = false;
+
+    // Try fullscreen on the <video> element first, fallback to overlay
+    requestFS(video).then(() => {
+      const p = video.play();
+      if (p) p.catch(()=>{});
+    }).catch(() => {
+      const p = video.play();
+      if (p) {
+        p.then(() => requestFS(overlay).catch(()=>{})).catch(()=> requestFS(overlay).catch(()=>{}));
+      } else {
+        requestFS(overlay).catch(()=>{});
+      }
+    });
+  }
+
+  function closeVideo(){
+    try { video.pause(); } catch(e){}
+    // exit any fullscreen
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  trigger.addEventListener('click', openVideo, { passive:true });
+  trigger.addEventListener('touchstart', function(e){ e.preventDefault(); openVideo(); }, { passive:false });
+  closeBtn.addEventListener('click', closeVideo);
+  overlay.addEventListener('click', function(e){
+    if (e.target === overlay) closeVideo();
+  });
+
+  // keyboard: Esc to close
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeVideo();
+  });
+
+  // accessibility: focusable
+  trigger.setAttribute('tabindex','0');
+  trigger.addEventListener('keydown', function(e){ if (e.key==='Enter' || e.key===' ') { e.preventDefault(); openVideo(); } });
+
+  // debug tip: open DevTools Console and reload; any missing image names logged there
+  console.log('index3 initialized — imgBase:', imgBase, 'videoFile:', videoFile);
+</script>
+ Cảm ơn mọi người đã xem
+</body>
+</html>
